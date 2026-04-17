@@ -3,12 +3,26 @@ import socket
 
 app = Flask(__name__)
 
+def scan_ports(ip):
+    common_ports = [21, 22, 23, 80, 443]
+    open_ports = []
+
+    for port in common_ports:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        result = sock.connect_ex((ip, port))
+        if result == 0:
+            open_ports.append(port)
+        sock.close()
+
+    return open_ports
+
 @app.route('/')
 def home():
     return '''
-    <h1>CyberScan 😈</h1>
+    <h1>CyberScan Pro 😈</h1>
     <form action="/scan">
-        <input type="text" name="target" placeholder="Enter IP or Domain">
+        <input type="text" name="target" placeholder="Enter Domain or IP">
         <button type="submit">Scan</button>
     </form>
     '''
@@ -19,13 +33,19 @@ def scan():
 
     try:
         ip = socket.gethostbyname(target)
+        hostname = socket.gethostbyaddr(ip)[0]
+
+        ports = scan_ports(ip)
+
         return f"""
-        <h2>Result 😈:</h2>
-        <p>Target: {target}</p>
-        <p>IP Address: {ip}</p>
+        <h2>Results 😈</h2>
+        <p><b>Target:</b> {target}</p>
+        <p><b>IP:</b> {ip}</p>
+        <p><b>Host:</b> {hostname}</p>
+        <p><b>Open Ports:</b> {ports if ports else "None"}</p>
         """
     except:
-        return "<h2>Error ❌: Invalid target</h2>"
+        return "<h2>Error ❌ Invalid target</h2>"
 
 if __name__ == "__main__":
     import os
