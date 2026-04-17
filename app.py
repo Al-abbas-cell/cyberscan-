@@ -1,5 +1,6 @@
 from flask import Flask, request
 import socket
+import requests
 
 app = Flask(__name__)
 
@@ -17,10 +18,22 @@ def scan_ports(ip):
 
     return open_ports
 
+def get_ip_info(ip):
+    try:
+        url = f"http://ip-api.com/json/{ip}"
+        response = requests.get(url).json()
+        return {
+            "country": response.get("country"),
+            "city": response.get("city"),
+            "isp": response.get("isp")
+        }
+    except:
+        return None
+
 @app.route('/')
 def home():
     return '''
-    <h1>CyberScan Pro 😈</h1>
+    <h1 style="color:red;">CyberScan Elite 😈🔥</h1>
     <form action="/scan">
         <input type="text" name="target" placeholder="Enter Domain or IP">
         <button type="submit">Scan</button>
@@ -34,15 +47,20 @@ def scan():
     try:
         ip = socket.gethostbyname(target)
         hostname = socket.gethostbyaddr(ip)[0]
-
         ports = scan_ports(ip)
+        info = get_ip_info(ip)
 
         return f"""
-        <h2>Results 😈</h2>
+        <h2>Results 😈🔥</h2>
         <p><b>Target:</b> {target}</p>
         <p><b>IP:</b> {ip}</p>
         <p><b>Host:</b> {hostname}</p>
         <p><b>Open Ports:</b> {ports if ports else "None"}</p>
+
+        <h3>🌍 Location Info</h3>
+        <p><b>Country:</b> {info['country']}</p>
+        <p><b>City:</b> {info['city']}</p>
+        <p><b>ISP:</b> {info['isp']}</p>
         """
     except:
         return "<h2>Error ❌ Invalid target</h2>"
