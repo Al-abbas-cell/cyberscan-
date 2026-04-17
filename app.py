@@ -1,4 +1,5 @@
 from flask import Flask, request
+import socket
 
 app = Flask(__name__)
 
@@ -7,7 +8,7 @@ def home():
     return '''
     <h1>CyberScan 😈</h1>
     <form action="/scan">
-        <input type="text" name="target" placeholder="Enter target">
+        <input type="text" name="target" placeholder="Enter IP or Domain">
         <button type="submit">Scan</button>
     </form>
     '''
@@ -15,7 +16,16 @@ def home():
 @app.route('/scan')
 def scan():
     target = request.args.get('target')
-    return f"<h2>Result 😈:</h2><p>You entered: {target}</p>"
+
+    try:
+        ip = socket.gethostbyname(target)
+        return f"""
+        <h2>Result 😈:</h2>
+        <p>Target: {target}</p>
+        <p>IP Address: {ip}</p>
+        """
+    except:
+        return "<h2>Error ❌: Invalid target</h2>"
 
 if __name__ == "__main__":
     import os
